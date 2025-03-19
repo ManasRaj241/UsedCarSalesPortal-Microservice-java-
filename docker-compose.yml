@@ -1,0 +1,124 @@
+version: '3.8'
+
+networks:
+  my-network:
+    driver: bridge
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: Manas098#
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pManas098#" ]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - my-network
+
+  service-registry:
+    build: ./Service-Registery
+    container_name: service-registry
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - my-network
+
+  config-server:
+    build: ./Cloud-Config-Server
+    container_name: config-server
+    ports:
+      - "9196:9196"
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9196/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - my-network
+
+  identity-service:
+    build: ./Identity-service
+    container_name: identity-service
+    ports:
+      - "7001:7001"
+    depends_on:
+      config-server:
+        condition: service_started
+    networks:
+      - my-network
+
+  gateway:
+    build: ./Cloud-Gateway
+    container_name: cloud-gateway
+    ports:
+      - "7009:7009"
+    depends_on:
+      identity-service:
+        condition: service_started
+    networks:
+      - my-network
+
+  cart-service:
+    build: ./CartService
+    container_name: cart-service
+    ports:
+      - "1112:1112"
+    depends_on:
+      gateway:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    networks:
+      - my-network
+
+  checkout-service:
+    build: ./checkoutService
+    container_name: checkout-service
+    ports:
+      - "1113:1113"
+    depends_on:
+      cart-service:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    networks:
+      - my-network
+
+  coupon-service:
+    build: ./CouponService
+    container_name: coupon-service
+    ports:
+      - "1114:1114"
+    depends_on:
+      cart-service:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    networks:
+      - my-network
+
+  vehicle-service:
+    build: ./UCSP
+    container_name: vehicle-service
+    ports:
+      - "1111:1111"
+    depends_on:
+      config-server:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    networks:
+      - my-network

@@ -28,7 +28,7 @@ public class AuthConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 	    http.csrf(csrf -> csrf.disable())
 	        .authorizeHttpRequests(auth -> auth
-	            .requestMatchers("/auth/login", "/auth/register", "/auth/validate","auth/token", "auth/register", "auth/validate", "swagger-ui/index.html","swagger-ui/swagger-ui.css","swagger-ui/index.css","swagger-ui/swagger-ui-bundle.js", "swagger-ui/swagger-ui-standalone-preset.js", "swagger-ui/swagger-initializer.js", "swagger-ui/favicon-32x32.png", "swagger-ui/favicon-16x16.png","Auth-docs/swagger-config","Auth-docs","/?/auth/token", "/?/auth/register", "/?/auth/validate").permitAll()
+	            .requestMatchers("/auth/login","/actuator/health", "/auth/register", "/auth/validate","auth/token", "auth/register", "auth/validate", "swagger-ui/index.html","swagger-ui/swagger-ui.css","swagger-ui/index.css","swagger-ui/swagger-ui-bundle.js", "swagger-ui/swagger-ui-standalone-preset.js", "swagger-ui/swagger-initializer.js", "swagger-ui/favicon-32x32.png", "swagger-ui/favicon-16x16.png","Auth-docs/swagger-config","Auth-docs","/?/auth/token", "/?/auth/register", "/?/auth/validate").permitAll()
 	            .anyRequest().authenticated()
 	        );
 	    return http.build();
